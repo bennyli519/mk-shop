@@ -7,12 +7,20 @@
                   <h3>{{ product.title }}</h3>
                   <ul>
                       <li v-for="item in product.list">
-                          <a :href="item.url">{{item.name}}</a>
+                          <a :href="item.url">{{ item.name }}</a>
                           <span v-if="item.hot" class="hot-tag">HOT</span>
                       </li>
                   </ul>
                   <div v-if="!product.last" class="hr"></div>
               </template>
+          </div>
+          <div class="index-left-block lastest-news">
+            <h2>最新消息</h2>
+            <ul>
+              <li v-for="item in newsList">
+                <a :href="item.url" class="new-item">{{ item.name}}</a>
+              </li>
+            </ul>
           </div>
       </div>
   </div>
@@ -21,6 +29,25 @@
 export default {
   data () {
       return {
+          newsList:[
+              {
+                  name: '数据统计',
+                  url: 'http://starcraft.com'
+              },
+              {
+                  name: '数据预测',
+                  url: 'http://warcraft.com'
+              },
+              {
+                  name: '流量分析',
+                  url: 'http://overwatch.com',
+                  hot: true
+              },
+              {
+                  name: '广告发布',
+                  url: 'http://hearstone.com'
+              }
+          ],
           productList:{
               pc: {
                 title:'pc产品',
