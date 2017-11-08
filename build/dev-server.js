@@ -74,7 +74,7 @@ app.use(staticPath, express.static('./static'))
 // apiServer.listen(port + 1,function(){
 //   console.log("JSON SERVER IS RUNNING")
 // })
-ar apiServer = express()
+var apiServer = express()
 var bodyParser = require('body-parser')
 apiServer.use(bodyParser.urlencoded({ extended: true }))
 apiServer.use(bodyParser.json())
