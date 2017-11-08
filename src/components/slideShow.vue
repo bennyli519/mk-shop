@@ -1,19 +1,22 @@
 <template>
-  <div class="slide-show">
+  <div class="slide-show" @mouseover="clearInv" @mouseout="runInv">
     <div class="slide-img">
-      <a href="xxx">
-        <img :src="slides[0].src" alt="">
+      <a :href="slides[nowIndex].href">
+         <transition name="slide-trans">
+          <img v-if="isShow" :src="slides[nowIndex].src">
+        </transition>
+        <transition name="slide-trans-old">
+          <img v-if="!isShow" :src="slides[nowIndex].src">
+        </transition>
       </a>
     </div>
-    <h2>title</h2>
+    <h2>{{slides[nowIndex].title}}</h2>
     <ul class="slide-pages">
-      <li>&lt;</li>
-      <li>
-        <a href=""></a>
-        <a href=""></a>
-        <a href=""></a>
+      <li @click="goto(prevIndex)">&lt;</li>
+      <li v-for="(item,index) in slides" @click="goto(index)">
+        <a :class="{on:index === nowIndex}" >{{ index + 1}}</a>
       </li>
-      <li>&gt;</li>
+      <li @click="goto(nextIndex)">&gt;</li>
     </ul>
   </div>
 </template>
@@ -61,18 +64,19 @@ export default {
         this.isShow = true
         this.nowIndex = index
       }, 10)
+  
     },
-    runInv () {
+    runInv (){
       this.invId = setInterval(() => {
-        this.goto(this.nextIndex)
-      }, this.inv)
+          this.goto(this.nextIndex)
+      },this.inv)
     },
     clearInv () {
       clearInterval(this.invId)
     }
   },
   mounted () {
-    console.log(this.slides);
+    this.runInv()
   } 
 }
 </script>
