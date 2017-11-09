@@ -252,9 +252,15 @@
 </template>
 
 <script>
-
+import VSelection from '../../components/base/selection'
+import VCounter from '../../components/base/counter'
+import VMulChooser from '../../components/base/multiplyChooser'
 export default {
-
+  components: {
+    VSelection,
+    VCounter,
+    VMulChooser
+  },
   data () {
     return {
       tradeList: [

@@ -38,23 +38,23 @@ export default {
   },
   computed: {
     userErrors () {
-        let errorText,status    
-        if(!/@/g.test(this.usernameModel)){
-            status = false
-            errorText = "不包含@"
-        }else {
-            status = true
-            errorText = ''
-        } 
-        if (!this.userFlag) {
-            errorText = ''
-            this.userFlag = true
-        }
-        return {
-            status:status,
-            errorText:errorText
-        }
-        
+      let errorText, status
+      if (!/@/g.test(this.usernameModel)) {
+        status = false
+        errorText = '不包含@'
+      }
+      else {
+        status = true
+        errorText = ''
+      }
+      if (!this.userFlag) {
+        errorText = ''
+        this.userFlag = true
+      }
+      return {
+        status,
+        errorText
+      }
     },
     passwordErrors () {
       let errorText, status
@@ -78,18 +78,18 @@ export default {
   },
   methods: {
     onLogin () {
-        if(!this.userErrors.status || !this.passwordErrors.status){
-            this.errorText = '部分项没通过'
-        }else {
-            this.errorText = ''
-            this.$http.post('api/login').
-            then((res)=>{
-                this.$emit('has-log',res.data)
-            },(err)=>{
-                console.log(err)
-            })
-        }
-
+      if (!this.userErrors.status || !this.passwordErrors.status) {
+        this.errorText = '部分选项未通过'
+      }
+      else {
+        this.errorText = ''
+        this.$http.get('api/login')
+        .then((res) => {
+          this.$emit('has-log', res.data)
+        }, (error) => {
+          console.log(error)
+        })
+      }
     }
   }
 }

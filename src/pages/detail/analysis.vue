@@ -10,7 +10,7 @@
                   购买数量：
               </div>
               <div class="sales-board-line-right">
-               
+                <v-counter @on-change="onParamChange('buyNum', $event)"></v-counter>
               </div>
           </div>
           <div class="sales-board-line">
@@ -18,7 +18,7 @@
                   产品类型：
               </div>
               <div class="sales-board-line-right">
-                  <v-selection :selections="buyTypes"></v-selection>
+                  <v-selection :selections="buyTypes" @on-change="onParamChange('buyType', $event)"></v-selection>
               </div>
           </div>
           <div class="sales-board-line">
@@ -26,7 +26,9 @@
                   有效时间：
               </div>
               <div class="sales-board-line-right">
-                  
+                  <v-chooser
+                  :selections="periodList"
+                  @on-change="onParamChange('period', $event)"></v-chooser>
               </div>
           </div>
           <div class="sales-board-line">
@@ -34,7 +36,9 @@
                   产品版本：
               </div>
               <div class="sales-board-line-right">
-                 
+                  <v-mul-chooser
+                  :selections="versionList"
+                  @on-change="onParamChange('versions', $event)"></v-mul-chooser>
               </div>
           </div>
           <div class="sales-board-line">
@@ -48,7 +52,7 @@
           <div class="sales-board-line">
               <div class="sales-board-line-left">&nbsp;</div>
               <div class="sales-board-line-right">
-                  <div class="button">
+                  <div class="button" @click="showPayDialog">
                     立即购买
                   </div>
               </div>
@@ -76,16 +80,56 @@
           <li>用户所在地理区域分布状况等</li>
         </ul>
       </div>
-
-  
+      <my-dialog :is-show="isShowPayDialog" @on-close="hidePayDialog">
+        <table class="buy-dialog-table">
+          <tr>
+            <th>购买数量</th>
+            <th>产品类型</th>
+            <th>有效时间</th>
+            <th>产品版本</th>
+            <th>总价</th>
+          </tr>
+          <tr>
+            <td>{{ buyNum }}</td>
+            <td>{{ buyType.label }}</td>
+            <td>{{ period.label }}</td>
+            <td>
+              <span v-for="item in versions">{{ item.label }}</span>
+            </td>
+            <td>{{ price }}</td>
+          </tr>
+        </table>
+        <h3 class="buy-dialog-title">请选择银行</h3>
+        <bank-chooser @on-change="onChangeBanks"></bank-chooser>
+        <div class="button buy-dialog-btn" @click="confirmBuy">
+          确认购买
+        </div>
+      </my-dialog>
+      <my-dialog :is-show="isShowErrDialog" @on-close="hideErrDialog">
+        支付失败！
+      </my-dialog>
+      <check-order :is-show-check-dialog="isShowCheckOrder" :order-id="orderId" @on-close-check-dialog="hideCheckOrder"></check-order>
   </div>
 </template>
 
 <script>
 import VSelection from '../../components/base/selection'
+import VCounter from '../../components/base/counter'
+import VChooser from '../../components/base/chooser'
+import VMulChooser from '../../components/base/multiplyChooser'
+import Dialog from '../../components/base/dialog'
+import BankChooser from '../../components/bankChooser'
+import CheckOrder from '../../components/checkOrder'
+import _ from 'lodash'
 export default {
-  components:{
-    VSelection
+  components: {
+    VSelection,
+    VCounter,
+    VChooser,
+    VMulChooser,
+    MyDialog: Dialog,
+    BankChooser,
+    CheckOrder
   },
   data () {
     return {
@@ -144,15 +188,69 @@ export default {
     }
   },
   methods: {
-
+    onParamChange (attr, val) {
+      this[attr] = val
+      this.getPrice()
+    },
+    getPrice () {
+      let buyVersionsArray = _.map(this.versions, (item) => {
+        return item.value
+      })
+      let reqParams = {
+        buyNumber: this.buyNum,
+        buyType: this.buyType.value,
+        period: this.period.value,
+        version: buyVersionsArray.join(',')
+      }
+      this.$http.post('/api/getPrice', reqParams)
+      .then((res) => {
+        this.price = res.data.amount
+      })
+    },
+    showPayDialog () {
+      this.isShowPayDialog = true
+    },
+    hidePayDialog () {
+      this.isShowPayDialog = false
+    },
+    hideErrDialog () {
+      this.isShowErrDialog = false
+    },
+    hideCheckOrder () {
+      this.isShowCheckOrder = false
+    },
+    onChangeBanks (bankObj) {
+      this.bankId = bankObj.id
+    },
+    confirmBuy () {
+      let buyVersionsArray = _.map(this.versions, (item) => {
+        return item.value
+      })
+      let reqParams = {
+        buyNumber: this.buyNum,
+        buyType: this.buyType.value,
+        period: this.period.value,
+        version: buyVersionsArray.join(','),
+        bankId: this.bankId
+      }
+      this.$http.post('/api/createOrder', reqParams)
+      .then((res) => {
+        this.orderId = res.data.orderId
+        this.isShowCheckOrder = true
+        this.isShowPayDialog = false
+      }, (err) => {
+        this.isShowBuyDialog = false
+        this.isShowErrDialog = true
+      })
+    }
+  },
+  mounted () {
+    this.buyNum = 1
+    this.buyType = this.buyTypes[0]
+    this.versions = [this.versionList[0]]
+    this.period = this.periodList[0]
+    this.getPrice()
   }
-  // mounted () {
-  //   this.buyNum = 1
-  //   this.buyType = this.buyTypes[0]
-  //   this.versions = [this.versionList[0]]
-  //   this.period = this.periodList[0]
-  //   this.getPrice()
-  // }
 }
 </script>
 

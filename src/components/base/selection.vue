@@ -38,9 +38,6 @@ export default {
       this.isDrop = false
       this.$emit('on-change', this.selections[this.nowIndex])
     }
-  },
-  mounted (){
-      console.log(this.selections[this.nowIndex].label )
   }
 }
 </script>
